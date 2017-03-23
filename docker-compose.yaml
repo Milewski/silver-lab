@@ -1,0 +1,37 @@
+version: '3'
+
+volumes:
+  silverlab-mysql-data:
+    driver: local
+
+services:
+
+  mysql:
+    image: daocloud.io/mysql:5.7
+    container_name: silverlab-mysql
+    volumes:
+      - silverlab-mysql-data:/var/lib/mysql
+    ports:
+      - "3307:3306"
+    environment:
+      - MYSQL_ROOT_PASSWORD=silverlab
+      - MYSQL_DATABASE=silverlab
+      - MYSQL_USER=silverlab
+      - MYSQL_PASSWORD=silverlab
+
+  php:
+      image: daocloud.io/php:7.0-fpm-alpine
+      container_name: silverlab-php
+      volumes:
+        - .:/var/www/app
+
+  nginx:
+    image: daocloud.io/nginx:latest
+    container_name: silverlab-nginx
+    volumes:
+      - .:/var/www/app
+    environment:
+      - NGINX_PORT=80
+    ports:
+      - "80:8080"
+    command: /bin/sh -c "envsubst < /var/www/app/server/nginx/silverlab.nginx > /etc/nginx/conf.d/default.conf && nginx -g 'daemon off;'"
